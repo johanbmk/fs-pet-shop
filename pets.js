@@ -1,6 +1,8 @@
 let path = require('path');
 let fs = require('fs');
 
+let DB_FILE = './pets.json';
+
 let fileName = path.basename(process.argv[1]);
 let subCommand = process.argv[2];
 
@@ -20,8 +22,8 @@ function getDataBase(dbFilePath, callback){
 
 
 if (subCommand === 'read') {
-  getDataBase('./pets.json', pets => {
-    let index = process.argv[3];
+  getDataBase(DB_FILE, pets => {
+  let index = process.argv[3];
     if (index) {
       if (index < 0 || index >= pets.length) {
         console.error(`Usage: node ${fileName} read INDEX`);
@@ -32,5 +34,29 @@ if (subCommand === 'read') {
     } else {
       console.log(pets);
     }
-  });
+  })
+}
+
+if (subCommand === 'create') {
+  let age = process.argv[3];
+  let kind = process.argv[4];
+  let name = process.argv[5];
+  if (isNaN(age) || !kind || !name) {
+    console.error(`Usage: node ${fileName} create AGE KIND NAME`);
+    process.exit(-1);
+  }
+  let newPet = {};
+  newPet.age = Number(age);
+  newPet.kind = kind;
+  newPet.name = name;
+  getDataBase(DB_FILE, pets => {
+    pets.push(newPet);
+    let json = JSON.stringify(pets);
+    fs.writeFile(DB_FILE, json, (err) => {
+      if (err) {
+        throw err;
+      }
+    })
+  })
+  console.log(newPet);
 }
