@@ -60,3 +60,28 @@ if (subCommand === 'create') {
   })
   console.log(newPet);
 }
+
+
+if (subCommand === 'update') {
+  let index = Number(process.argv[3]);
+  let age = Number(process.argv[4]);
+  let kind = process.argv[5];
+  let name = process.argv[6];
+  if (isNaN(index) || isNaN(age) || !kind || !name) {
+    console.error(`Usage: node ${fileName} update INDEX AGE KIND NAME`);
+    process.exit(-1);
+  }
+  getDataBase(DB_FILE, pets => {
+    var pet = pets[index];
+    pet.age = age;
+    pet.kind = kind;
+    pet.name = name;
+    let json = JSON.stringify(pets);
+    fs.writeFile(DB_FILE, json, (err) => {
+      if (err) {
+        throw err;
+      }
+    })
+    console.log(pet);
+  })
+}
