@@ -35,3 +35,6 @@ function getDataBase(dbFilePath, callback){
     callback(obj);
   });
 }
+
+
+module.exports = app;
