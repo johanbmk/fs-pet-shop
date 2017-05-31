@@ -1,3 +1,5 @@
+#!/usr/bin/env node
+
 let path = require('path');
 let fs = require('fs');
 
