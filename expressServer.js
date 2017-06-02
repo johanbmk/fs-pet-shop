@@ -1,6 +1,6 @@
 const express = require('express');
 const app = express();
-const bodyParser = require('body-parser');
+const bodyParser = require('body-parser'); // npm i body-parser
 const fs = require('fs');
 
 const DB_FILE = './pets.json';
@@ -13,7 +13,7 @@ app.post('/pets', (req, res) => {
   let {age, kind, name} = req.body;
   if (isNaN(age) || !kind || !name) {
     res.status(400);
-    res.set('content-type','text/plain');
+    res.set('Content-Type','text/plain');
     res.send('Bad Request');
   } else {
     let newPet = {};
@@ -25,17 +25,18 @@ app.post('/pets', (req, res) => {
       let json = JSON.stringify(pets);
       fs.writeFile(DB_FILE, json, (err) => {
         if (err) {
-          throw err;
+          console.error(err.stack);
+          return res.sendStatus(500);
         }
-      })
-    })
-    res.json(newPet);
+      });
+    });
+    res.send(newPet);
   }
 });
 
 app.get('/pets', (req, res) => {
   getDataBase(DB_FILE, pets => {
-    res.json(pets);
+    res.send(pets);
   })
 });
 
@@ -44,10 +45,10 @@ app.get('/pets/:index', (req, res) => {
     let index = req.params.index;
     if (index < 0 || index >= pets.length) {
       res.status(404);
-      res.set('content-type','text/plain');
+      res.set('Content-Type','text/plain');
       res.send('Not Found');
     } else {
-      res.json(pets[index]);
+      res.send(pets[index]);
     }
   })
 });
@@ -59,7 +60,10 @@ app.listen(8000, () => {
 
 function getDataBase(dbFilePath, callback){
   fs.readFile(dbFilePath, (err, data) => {
-    if(err) throw err;
+    if (err) {
+      console.error(err.stack);
+      return res.sendStatus(500);
+    }
     let obj = JSON.parse(data);
     callback(obj);
   });
