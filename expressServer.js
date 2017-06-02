@@ -13,7 +13,7 @@ app.post('/pets', (req, res) => {
   let {age, kind, name} = req.body;
   if (isNaN(age) || !kind || !name) {
     res.status(400);
-    res.set('Content-Type','text/plain');
+    res.set('Content-Type', 'text/plain');
     res.send('Bad Request');
   } else {
     let newPet = {};
@@ -44,13 +44,15 @@ app.get('/pets/:index', (req, res) => {
   getDataBase(DB_FILE, pets => {
     let index = req.params.index;
     if (index < 0 || index >= pets.length) {
-      res.status(404);
-      res.set('Content-Type','text/plain');
-      res.send('Not Found');
+      res.sendStatus(404);
     } else {
       res.send(pets[index]);
     }
   })
+});
+
+app.use((req, res) => {
+  res.sendStatus(404);
 });
 
 app.listen(8000, () => {
