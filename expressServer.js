@@ -20,7 +20,12 @@ app.post('/pets', (req, res) => {
     newPet.age = Number(age);
     newPet.kind = kind;
     newPet.name = name;
-    getDataBase(DB_FILE, pets => {
+    fs.readFile(DB_FILE, (err, data) => {
+      if (err) {
+        console.error(err.stack);
+        return res.sendStatus(500);
+      }
+      let pets = JSON.parse(data);
       pets.push(newPet);
       let json = JSON.stringify(pets);
       fs.writeFile(DB_FILE, json, (err) => {
@@ -28,28 +33,39 @@ app.post('/pets', (req, res) => {
           console.error(err.stack);
           return res.sendStatus(500);
         }
+        res.send(newPet);
       });
     });
-    res.send(newPet);
   }
 });
 
 app.get('/pets', (req, res) => {
-  getDataBase(DB_FILE, pets => {
+  fs.readFile(DB_FILE, (err, data) => {
+    if (err) {
+      console.error(err.stack);
+      return res.sendStatus(500);
+    }
+    let pets = JSON.parse(data);
     res.send(pets);
-  })
+  });
 });
 
 app.get('/pets/:index', (req, res) => {
-  getDataBase(DB_FILE, pets => {
+  fs.readFile(DB_FILE, (err, data) => {
+    if (err) {
+      console.error(err.stack);
+      return res.sendStatus(500);
+    }
+    let pets = JSON.parse(data);
     let index = req.params.index;
     if (index < 0 || index >= pets.length) {
       res.sendStatus(404);
     } else {
       res.send(pets[index]);
     }
-  })
+  });
 });
+
 
 app.use((req, res) => {
   res.sendStatus(404);
@@ -58,18 +74,6 @@ app.use((req, res) => {
 app.listen(8000, () => {
   console.log('Now Listening on port 8000');
 });
-
-
-function getDataBase(dbFilePath, callback){
-  fs.readFile(dbFilePath, (err, data) => {
-    if (err) {
-      console.error(err.stack);
-      return res.sendStatus(500);
-    }
-    let obj = JSON.parse(data);
-    callback(obj);
-  });
-}
 
 
 module.exports = app;
