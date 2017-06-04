@@ -11,6 +11,7 @@ app.use(bodyParser.json());
 app.use(morgan('short'));
 
 
+// Create
 app.post('/pets', (req, res) => {
   let {age, kind, name} = req.body;
   if (isNaN(age) || !kind || !name) {
@@ -30,7 +31,7 @@ app.post('/pets', (req, res) => {
       let pets = JSON.parse(data);
       pets.push(newPet);
       let json = JSON.stringify(pets);
-      fs.writeFile(DB_FILE, 'utf8', json, (err) => {
+      fs.writeFile(DB_FILE, json, 'utf8', (err) => {
         if (err) {
           console.error(err.stack);
           return res.sendStatus(500);
@@ -41,17 +42,8 @@ app.post('/pets', (req, res) => {
   }
 });
 
-app.get('/pets', (req, res) => {
-  fs.readFile(DB_FILE, 'utf8', (err, data) => {
-    if (err) {
-      console.error(err.stack);
-      return res.sendStatus(500);
-    }
-    let pets = JSON.parse(data);
-    res.send(pets);
-  });
-});
 
+// Read
 app.get('/pets/:index', (req, res) => {
   fs.readFile(DB_FILE, 'utf8', (err, data) => {
     if (err) {
@@ -69,9 +61,65 @@ app.get('/pets/:index', (req, res) => {
 });
 
 
+// Update
+app.patch('/pets/:index', (req, res) => {
+  fs.readFile(DB_FILE, 'utf8', (err, data) => {
+    if (err) {
+      console.error(err.stack);
+      return res.sendStatus(500);
+    }
+    let pets = JSON.parse(data);
+    let index = req.params.index;
+    if (index < 0 || index >= pets.length) {
+      return res.sendStatus(404);
+    }
+    for (let key in req.body) {
+      // Data validation
+      if (key === 'age') {
+        if (isNaN(req.body.age)) {
+          res.status(400);
+          res.set('Content-Type', 'text/plain');
+          return res.send('Bad Request');
+        } else {
+          req.body.age = Number(req.body.age);
+        }
+      }
+      // Apply updates
+      pets[index][key] = req.body[key];
+    }
+    // Write to database
+    let json = JSON.stringify(pets);
+    fs.writeFile(DB_FILE, json, 'utf8', (err) => {
+      if (err) {
+        console.error(err.stack);
+        return res.sendStatus(500);
+      }
+      res.send(pets[index]);
+    });
+  });
+});
+
+
+// Delete  TODO
+
+
+// Query
+app.get('/pets', (req, res) => {
+  fs.readFile(DB_FILE, 'utf8', (err, data) => {
+    if (err) {
+      console.error(err.stack);
+      return res.sendStatus(500);
+    }
+    let pets = JSON.parse(data);
+    res.send(pets);
+  });
+});
+
+
 app.use((req, res) => {
   res.sendStatus(404);
 });
+
 
 app.listen(8000, () => {
   console.log('Now Listening on port 8000');
