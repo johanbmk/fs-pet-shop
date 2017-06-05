@@ -30,7 +30,7 @@ app.post('/pets', (req, res) => {
       let pets = JSON.parse(data);
       pets.push(newPet);
       let json = JSON.stringify(pets);
-      fs.writeFile(DB_FILE, 'utf8', json, (err) => {
+      fs.writeFile(DB_FILE, json, 'utf8', (err) => {
         if (err) {
           console.error(err.stack);
           return res.sendStatus(500);
