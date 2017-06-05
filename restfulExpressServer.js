@@ -36,7 +36,7 @@ app.post('/pets', (req, res) => {
           console.error(err.stack);
           return res.sendStatus(500);
         }
-        res.send(newPet);
+        res.status(201).send(newPet);
       });
     });
   }
@@ -100,7 +100,29 @@ app.patch('/pets/:index', (req, res) => {
 });
 
 
-// Delete  TODO
+// Delete
+app.delete('/pets/:index', (req, res) => {
+  fs.readFile(DB_FILE, 'utf8', (err, data) => {
+    if (err) {
+      console.error(err.stack);
+      return res.sendStatus(500);
+    }
+    let pets = JSON.parse(data);
+    let index = req.params.index;
+    if (index < 0 || index >= pets.length) {
+      return res.sendStatus(404);
+    }
+    var deleted = pets.splice(index, 1);
+    let json = JSON.stringify(pets);
+    fs.writeFile(DB_FILE, json, 'utf8', (err) => {
+      if (err) {
+        console.error(err.stack);
+        return res.sendStatus(500);
+      }
+      res.send(deleted[0]);
+    });
+  });
+});
 
 
 // Query
@@ -122,7 +144,8 @@ app.use((req, res) => {
 
 
 app.listen(8000, () => {
-  console.log('Now Listening on port 8000');
+  let now = new Date();
+  console.log(`${now}: Listening on port 8000`);
 });
 
 
