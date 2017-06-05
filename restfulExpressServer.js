@@ -36,7 +36,7 @@ app.post('/pets', (req, res) => {
           console.error(err.stack);
           return res.sendStatus(500);
         }
-        res.status(201).send(newPet);
+        res.status(200).send(newPet);
       });
     });
   }
